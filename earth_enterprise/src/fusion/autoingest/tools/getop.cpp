@@ -80,11 +80,13 @@ main(int argc, char *argv[])
     bool help  = false;
     int delay = 5;
     int timeout = 60;
+    bool freeze = false;
     khGetopt options;
     options.flagOpt("help", help);
     options.flagOpt("?", help);
     options.opt("delay", delay);
     options.opt("timeout", timeout);
+    options.opt("freeze", freeze);
     if (!options.processAll(argc, argv, argn))
       usage(progname);
     if (help)
@@ -93,7 +95,12 @@ main(int argc, char *argv[])
       usage(progname, "--delay must be positive");
     if (timeout < 0)
       usage(progname, "--timeout must not be less than zero");
-
+    if (freeze) {
+      QString error;
+      TaskLists taskLists;
+      khAssetManagerProxy::GetCurrTasks("FreezeSysMan", taskLists, error);
+      return 0;
+    }
 
     std::string master    = AssetDefs::MasterHostName();
     std::string assetroot = AssetDefs::AssetRoot();

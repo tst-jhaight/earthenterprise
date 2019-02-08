@@ -458,6 +458,32 @@ khAssetManager::HandleClientLoop(FusionConnection::Handle client) throw()
           } else if (cmdname == PUBLISH_DATABASE) {
             // TODO: Deserialize parameters from protobuf here.
             replyPayload = PublishDatabase(msg.payload);
+          } else if (cmdname == "GetCurrTasks") {
+            std::string specialStr;
+            FromPayload(msg.payload, specialStr);
+            if (specialStr == "FreezeSysMan") {
+              khLockGuard lock(mutex);
+              PendingAssetGuard guard(*this);
+              notify(NFY_WARN, "Holding the mutex for 10 minutes to see what happens");
+              sleep(600);
+              notify(NFY_WARN, "Releasing the mutex again!\n");
+            }
+            else {
+              TaskLists ret;
+              std::string dummy;
+              if (mutex.timedTryLock(60)) {
+                GetCurrTasks(dummy, ret);
+                mutex.Unlock();
+                if (!ToPayload(ret, replyPayload)) {
+		              throw khException(kh::tr("Unable to encode %1 reply payload")
+				            .arg(ToQString(cmdname)));
+	              }
+              }
+              else {
+                notify(NFY_WARN, "Timed out waiting for lock on current task request");
+                client->SendReply(msg, "ERROR: Timed out waiting for lock");
+              }
+            }
           } else {
             DispatchRequest(msg, replyPayload);
           }
