@@ -22,6 +22,8 @@ import string
 env = env.Clone();
 env.Append(CPPPATH = ['#fusion/autoingest/sysman', # static headers
                       ])
+env.Append( CPPFLAGS=["-fopenmp"] )
+env.Append( LINKFLAGS=["-fopenmp"] )
 
 idlfiles = [ 'NextTaskId', 'JobStorage', 'TaskStorage', 'TaskRule',
              'FusionUniqueId' ]

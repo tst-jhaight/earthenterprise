@@ -90,8 +90,14 @@ void
 AssetVersionImplD::StateChangeNotifier::NotifyParents(
     std::shared_ptr<StateChangeNotifier> notifier) {
   notify(NFY_VERBOSE, "Iterate through parents");
+
   int i = 1;
-  for (const std::string & ref : parentsToNotify) {
+  std::vector<std::string> pvector;
+  std::copy(parentsToNotify.begin(), parentsToNotify.end(), std::inserter(pvector, pvector.end()));
+  int theSize = pvector.size();
+  #pragma omp parallel for
+  for (int it = 0; it < theSize; ++it) {
+    const std::string& ref = pvector[it];
     AssetVersionD assetVersion(ref);
     notify(NFY_PROGRESS, "Iteration: %d | Total Iterations: %s | parent: %s",
            i,
@@ -114,7 +120,12 @@ AssetVersionImplD::StateChangeNotifier::NotifyListeners(
     std::shared_ptr<StateChangeNotifier> notifier) {
   notify(NFY_VERBOSE, "Iterate through listeners");
   int i = 1;
-  for (const std::pair<std::string, InputStates> & elem : listenersToNotify) {
+  std::vector<std::pair<std::string, InputStates>> lvec;
+  std::copy(listenersToNotify.begin(), listenersToNotify.end(), std::inserter(lvec, lvec.end()));
+  int theSize = lvec.size();
+
+  for (int it = 0; it < theSize; ++it) {
+    const std::pair<std::string, InputStates> & elem = lvec[it];
     const std::string & ref = elem.first;
     const InputStates & states = elem.second;
     AssetVersionD assetVersion(ref);
