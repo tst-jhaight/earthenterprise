@@ -108,14 +108,19 @@ void PacketLevelAssetVersionImplD::DoSubmitTask(void) {
 namespace {
 void GetInputChildren(const AssetVersion &ver,
                       std::vector<std::string> &inputkids) {
-  for (std::vector<std::string>::const_iterator i
-         = ver->inputs.begin();
-       i != ver->inputs.end(); ++i) {
-    AssetVersion input(*i);
-    if (input) {
-      std::copy(input->children.begin(), input->children.end(),
-                back_inserter(inputkids));
-    }
+  std::queue<std::shared_ptr<AssetVersion>> goodVersions;
+  auto theClosure = [&](const std::string& v)
+  {
+    std::shared_ptr<AssetVersion> p = new AssetVersion(v);
+    if (*p)
+      goodVersions.push_back(p);
+  };
+  ver->inputs.doForEach(theClosure);
+  while (!goodVersions.empty()) {
+    std::shared_ptr<AssetVersion> p = goodVersions.front();
+    goodVersions.pop();
+    auto anotherClosure = [&inputkids](const std::string& v) { inputkids.push_back(v); };
+    p->children.doForEach(anotherClosure);
   }
 }
 }

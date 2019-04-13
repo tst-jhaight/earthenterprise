@@ -670,7 +670,8 @@ void RasterProjectAssetVersionImplD::ChildrenToCancel(
     std::vector<AssetVersion> &out) {
   if (children.size()) {
     // my direct children are my index and optionally a copyright
-    std::copy(children.begin(), children.end(), back_inserter(out));
+    auto theClosure = [&out](const std::string& v){ out.push_back(); };
+    children.doForEach(theClosure);
 
     // additionally, my indexes' inputs are my sub assets as well
     for(uint i = 0; i < children.size(); ++i) {
