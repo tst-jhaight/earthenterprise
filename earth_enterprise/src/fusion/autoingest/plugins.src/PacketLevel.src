@@ -39,6 +39,7 @@ class PacketLevelAssetVersionImplD {
 #include "common/khFileUtils.h"
 #include "common/khConstants.h"
 #include "fusion/autoingest/MiscConfig.h"
+#include <queue>
 
 void PacketLevelAssetVersionImplD::DoSubmitTask(void) {
   if (AttemptConvertFromOldLastGood()) {
@@ -111,16 +112,16 @@ void GetInputChildren(const AssetVersion &ver,
   std::queue<std::shared_ptr<AssetVersion>> goodVersions;
   auto theClosure = [&](const std::string& v)
   {
-    std::shared_ptr<AssetVersion> p = new AssetVersion(v);
+    std::shared_ptr<AssetVersion> p = std::make_shared<AssetVersion>(v);
     if (*p)
-      goodVersions.push_back(p);
+      goodVersions.push(p);
   };
   ver->inputs.doForEach(theClosure);
   while (!goodVersions.empty()) {
-    std::shared_ptr<AssetVersion> p = goodVersions.front();
-    goodVersions.pop();
+    AssetVersion& input = *(goodVersions.front().get());
     auto anotherClosure = [&inputkids](const std::string& v) { inputkids.push_back(v); };
-    p->children.doForEach(anotherClosure);
+    input->children.doForEach(anotherClosure);
+    goodVersions.pop();
   }
 }
 }

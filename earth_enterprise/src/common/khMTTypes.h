@@ -290,13 +290,17 @@ class MTVector {
       for_each(vec.begin(), vec.end(), func);
     }
 
-    void doForEach(std::function<bool (const T&)> func) const {
-      if (!func) return; // can't do anyting with an invalid function
+    bool doForEachUntil(std::function<bool (const T&)> func) const {
+      if (!func) return false; // can't do anyting with an invalid function
       std::lock_guard<std::mutex> lock(mtx);
+      bool loopedThroughAll = true;
       for (const auto& v : vec) {
-        if (!func(v))
+        if (!func(v)) {
+          loopedThroughAll = false;
           break;
+        }
       }
+      return loopedThroughAll;
     }
 /*
     template <class OutIter>

@@ -215,10 +215,10 @@ ProjectedMapProjectAssetVersionImplD::UpdateChildren(void)
             return false;
           }
           geindexConfig.layers_.back().levels_.push_back(
-              MapGEIndexConfig::Level(*levelverref));
+              MapGEIndexConfig::Level(v));
           return true;
         };
-        layerver->children.doForEach(theClosure);
+        layerver->children.doForEachUntil(theClosure);
       }
     }
 
