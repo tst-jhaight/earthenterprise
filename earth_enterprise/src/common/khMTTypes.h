@@ -302,21 +302,8 @@ class MTVector {
       }
       return loopedThroughAll;
     }
-/*
-    template <class OutIter>
-    void copyTo(OutIter& oi) {
-      std::lock_guard<std::mutex> lock(mtx);
-      std::copy(vec.begin(), vec.end(), oi);
-    }*/
+
 // The remaining methods are bad news but are currently needed to compile
-    /*const_iterator begin(void) const {
-      return vec.begin();
-    }
-
-    const_iterator end(void) const {
-      return vec.end();
-    }*/
-
     operator const Base&(void) const {
       return vec;
     }
